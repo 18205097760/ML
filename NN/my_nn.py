@@ -70,7 +70,7 @@ class Neuralnetwork:
       num = len(weights[i].weight)
       for j in range(len(weights[i].weight)):
         for l in range(len(weights[i].weight[j])):
-          self.weights[i].weight[j][l] = weights[i].weight[j][l] #/ num
+          self.weights[i].weight[j][l] = weights[i].weight[j][l] / num
       print(num)
 
   def checkValue(self, layers, weights):
@@ -87,8 +87,8 @@ class Neuralnetwork:
 
     for i in range(layers_num - 1):
       self.weights[i].calValue(self.layers[i], self.layers[i + 1])
-      self.layers[i].printValue()
-    self.layers[layers_num - 1].printValue()
+      #self.layers[i].printValue()
+    #self.layers[layers_num - 1].printValue()
 
   def printLayer(self, layers_num):
     self.layers[layers_num].printValue()

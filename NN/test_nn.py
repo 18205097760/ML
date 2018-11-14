@@ -26,7 +26,7 @@ label_items = []
 read_image.openImage('../data/MNIST/train-images.idx3-ubyte', '../data/MNIST/train-labels.idx1-ubyte', image_items, label_items)
 print(len(image_items))
 #训练次数
-t = 60000
+t = 6000
 for i in range(t):
   output = [0] * 10
   for j in range(10):
