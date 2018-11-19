@@ -20,9 +20,9 @@ def DNN(input, output_depths, scope='DNN'):
 
 minist = input_data.read_data_sets('./input_data',one_hot = True)
 
-batch_size = 50
-input_ph = tf.placeholder(dtype=tf.float32, shape=(batch_size,784))
-label_ph = tf.placeholder(dtype=tf.float32, shape=(batch_size,10))
+batch_size = 5
+input_ph = tf.placeholder(dtype=tf.float32, shape=(None,784))
+label_ph = tf.placeholder(dtype=tf.float32, shape=(None,10))
 
 dnn = DNN(input_ph, [400, 200, 100])
 loss = tf.losses.softmax_cross_entropy(logits=dnn, onehot_labels=label_ph)
@@ -42,7 +42,7 @@ with tf.Session() as sess:
         #print(sess.run(labels, feed_dict={input_ph:image, label_ph:labels}));
         sess.run(train_op, feed_dict={input_ph:image, label_ph:labels})
         if (e % 100 == 0):
-            image2,labels2 =  minist.test.next_batch(batch_size)
+            image2,labels2 =  minist.test.next_batch(100)
             #print(sess.run(real_num, feed_dict={input_ph:image, label_ph:labels}))
             #print(sess.run(pred_num, feed_dict={input_ph:image, label_ph:labels}))
             print(sess.run(succ, feed_dict={input_ph:image2, label_ph:labels2}))
