@@ -24,7 +24,7 @@ batch_size = 5
 input_ph = tf.placeholder(dtype=tf.float32, shape=(None,784))
 label_ph = tf.placeholder(dtype=tf.float32, shape=(None,10))
 
-dnn = DNN(input_ph, [400, 200, 100])
+dnn = DNN(input_ph, [400, 100])
 loss = tf.losses.softmax_cross_entropy(logits=dnn, onehot_labels=label_ph)
 #loss = tf.losses.mean_squared_error(dnn, label_ph)
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
