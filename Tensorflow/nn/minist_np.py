@@ -39,16 +39,18 @@ pic_num = len(image_items)
 train_num = 100
 test_num = 1000
 
-w1 = np.random.rand(784, 100) / 100.0
-w2 = np.random.rand(100, 10) / 10.0
+w1 = np.random.rand(784, 100) / 784.0
+w2 = np.random.rand(100, 10) / 100.0
 b1 = np.zeros((1, 100))
 b2 = np.zeros((1, 10))
-learning_rate = 0.01;
+learning_rate = 0.1;
 
 image_test_items = []
 label_test_items = []
 openImage('../../data/MNIST/t10k-images.idx3-ubyte', '../../data/MNIST/t10k-labels.idx1-ubyte', image_test_items, label_test_items)
 pic_test_num = len(image_test_items)
+
+hidden_func = 0
 
 for i in range(10000):
     if (i % 1000 == 0):
@@ -59,7 +61,8 @@ for i in range(10000):
 
         x = np.array(image_test_use).reshape(test_num,784) / 255.0
         test_y = np.array(label_test_use).reshape(test_num, 1)
-        y_ = np.eye(test_num, 10)[test_y].reshape(test_num, 10)
+        y_ = np.eye(10)[test_y].reshape(test_num, 10)
+       
     else:
         value = np.random.rand(1) * pic_num / train_num
         tran_set = int(value[0]) * train_num
@@ -68,13 +71,19 @@ for i in range(10000):
 
         x = np.array(image_use).reshape(train_num,784) / 255.0
         train_y = np.array(label_use).reshape(train_num, 1)
-        y_ = np.eye(train_num, 10)[train_y].reshape(train_num, 10)
+        y_ = np.eye(10)[train_y].reshape(train_num, 10)
 
     layer = np.dot(x, w1) + b1
-    layer_sigmod = 1.0/(1 + np.exp(-layer))
-    y = np.dot(layer_sigmod, w2) + b2
+    if hidden_func == 1:
+        layer_act = 1.0/(1 + np.exp(-layer))
+    else:
+        layer_act = np.maximum(np.zeros(layer.shape), layer)
+
+    y = np.dot(layer_act, w2) + b2
     y_sigmod = 1.0/(1 + np.exp(-y))
-    l = np.sum((y_sigmod - y_) ** 2 / pic_num)
+
+    #l = np.sum((y_ - y_sigmod) ** 2 / pic_num)
+    l = np.sum(np.dot(y_.T, np.log(y_sigmod)) + np.dot((1 - y_).T, np.log(1 - y_sigmod)) / pic_num)
 
     if (i % 1000 == 0):
         print(l)
@@ -83,21 +92,28 @@ for i in range(10000):
         print(np.sum(pred_num == real_num))
         continue;
 
-    dy_sigmod = y_sigmod - y_
-    #print(dy_sigmod)
+    #平方差收敛
+    #dy_sigmod = y_sigmod - y_
+    #dy = dy_sigmod * y_sigmod * (1.0 - y_sigmod)
 
-    dy = dy_sigmod * y_sigmod * (1.0 - y_sigmod)
+    #交叉熵
+    dy = y_sigmod - y_
+
+    #print(dy_sigmod)  
 
     db2 = dy
-    dw2 = np.dot(layer_sigmod.T, dy)
-    dlayer_sigmod = np.dot(dy, w2.T) 
+    dw2 = np.dot(layer_act.T, dy)
+    dlayer_act = np.dot(dy, w2.T) 
 
-    dlayer = dlayer_sigmod * layer_sigmod * (1.0 - layer_sigmod)
+    if hidden_func == 1:
+        dlayer = dlayer_act * layer_act * (1.0 - layer_act)
+    else:
+        dlayer = np.maximum(np.zeros(layer.shape), layer) / layer * dlayer_act
 
     db1 = dlayer
     dw1 = np.dot(x.T, dlayer)
 
-    b2 -= learning_rate * db2.sum(axis=0)
-    w2 -= learning_rate * dw2
-    b1 -= learning_rate * db1.sum(axis=0)
-    w1 -= learning_rate * dw1
+    b2 -= learning_rate * db2.sum(axis=0) / train_num
+    w2 -= learning_rate * dw2 / train_num
+    b1 -= learning_rate * db1.sum(axis=0) / train_num
+    w1 -= learning_rate * dw1 / train_num
